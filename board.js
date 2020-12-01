@@ -1,7 +1,8 @@
 import Pieces from "./pieces.js";
 
 const pieces = new Pieces();
-const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"]
+const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
+
 class Square {
     constructor(file, rank, board) {
         this.x = file;
@@ -18,6 +19,7 @@ class Square {
     isThreatened(color) {
         return this.board.threatenedSquares[color][this.toString()];
     }
+    // Output example: "e4"
     toString() {
         return this.file + this.rank;
     }
@@ -45,27 +47,31 @@ export default class Board {
         }
     }
     initialize() {
+        // Clear the grid
         this.emptyGrid();
-        const init = [
-            ["0R", "  ", "  ", "  ", "  ", "  ", "  ", "  ",],
-            ["0N", "  ", "  ", "  ", "  ", "  ", "  ", "  ",],
-            ["0B", "  ", "  ", "  ", "  ", "  ", "  ", "  ",],
-            ["0Q", "  ", "  ", "  ", "  ", "  ", "  ", "  ",],
-            ["0K", "  ", "  ", "  ", "1K", "  ", "  ", "  ",],
-            ["0B", "  ", "  ", "  ", "  ", "  ", "  ", "  ",],
-            ["0N", "  ", "  ", "  ", "  ", "  ", "  ", "  ",],
-            ["0R", "  ", "  ", "  ", "  ", "  ", "  ", "  ",],
-        ]
+
+        // For check test
         // const init = [
-        //     ["0R", "0P", "  ", "  ", "  ", "  ", "1P", "1R",],
-        //     ["0N", "0P", "  ", "  ", "  ", "  ", "1P", "1N",],
-        //     ["0B", "0P", "  ", "  ", "  ", "  ", "1P", "1B",],
-        //     ["0Q", "0P", "  ", "  ", "  ", "  ", "1P", "1Q",],
-        //     ["0K", "0P", "  ", "  ", "  ", "  ", "1P", "1K",],
-        //     ["0B", "0P", "  ", "  ", "  ", "  ", "1P", "1B",],
-        //     ["0N", "0P", "  ", "  ", "  ", "  ", "1P", "1N",],
-        //     ["0R", "0P", "  ", "  ", "  ", "  ", "1P", "1R",],
+        //     ["0R", "  ", "  ", "  ", "  ", "  ", "  ", "  ",],
+        //     ["0N", "  ", "  ", "  ", "  ", "  ", "  ", "  ",],
+        //     ["0B", "  ", "  ", "  ", "  ", "  ", "  ", "  ",],
+        //     ["0Q", "  ", "  ", "  ", "  ", "  ", "  ", "  ",],
+        //     ["0K", "  ", "  ", "  ", "1K", "  ", "  ", "  ",],
+        //     ["0B", "  ", "  ", "  ", "  ", "  ", "  ", "  ",],
+        //     ["0N", "  ", "  ", "  ", "  ", "  ", "  ", "  ",],
+        //     ["0R", "  ", "  ", "  ", "  ", "  ", "  ", "  ",],
         // ]
+        const init = [
+            ["0R", "0P", "  ", "  ", "  ", "  ", "1P", "1R",],
+            ["0N", "0P", "  ", "  ", "  ", "  ", "1P", "1N",],
+            ["0B", "0P", "  ", "  ", "  ", "  ", "1P", "1B",],
+            ["0Q", "0P", "  ", "  ", "  ", "  ", "1P", "1Q",],
+            ["0K", "0P", "  ", "  ", "  ", "  ", "1P", "1K",],
+            ["0B", "0P", "  ", "  ", "  ", "  ", "1P", "1B",],
+            ["0N", "0P", "  ", "  ", "  ", "  ", "1P", "1N",],
+            ["0R", "0P", "  ", "  ", "  ", "  ", "1P", "1R",],
+        ]
+        // Initialize the board using the init state.
         for (let x = 0; x < 8; x++) {
             for (let y = 0; y < 8; y++) {
                 const piece = pieces.spawn(init[x][y]);
@@ -74,7 +80,6 @@ export default class Board {
                     piece.square = this.grid[x][y];
                     this.pieces.push(piece);
                     this.piecesByTurn[piece.color].push(piece);
-                    this.piecesByTurn[piece.color].push(piece);
                     this.grid[x][y].piece = piece;
                 }
             }
@@ -82,6 +87,7 @@ export default class Board {
         this.calculateValidMoves();
         this.gui.render(this);
     }
+    // Log board state to console
     log() {
         let boardString = "";
         let boardUtf8 = "";
@@ -101,17 +107,19 @@ export default class Board {
         console.log(boardUtf8);
         return boardString;
     }
-
+    // Check if coordinate is on the board
     validSquare(x, y) {
         if (x < 0 || x > 7 || y < 0 || y > 7) {
             return false;
         }
         return true;
     }
+    // Get the Square Object at the coordinate
     getSquare(x, y) {
         if (!this.validSquare(x, y)) return null;
         return this.grid[x][y];
     }
+    // Calculate all possible moves and generate validMoves dict + threatenedSquares
     calculateValidMoves() {
         this.validMoves = {};
         this.threatenedSquares = [{}, {}];
@@ -138,12 +146,13 @@ export default class Board {
         if (this.check && (this.check.color == this.turn)) {
             console.log(this.check);
             console.log(this.turn)
-            this.validMoves = this._FilterCheckEscapeMoves(this.validMoves)
+            this.validMoves = this._filterCheckEscapeMoves(this.validMoves)
         }
         console.log(`${this.turn ? "Black" : "White"} to move.`);
         console.log(Object.keys(this.validMoves));
         return this.validMoves;
     }
+    // Attempt to execute a move
     move(notation) {
         notation.trim();
         const move = this.validMoves[notation];
@@ -156,7 +165,8 @@ export default class Board {
             this.gui.render(this);
         }
     }
-    _FilterCheckEscapeMoves(validMoves) {
+    // If in check, remove all moves that do not escape check
+    _filterCheckEscapeMoves(validMoves) {
         const newValidMoves = {};
         const kingSquare = this.check.square;
         const attackers = kingSquare.isThreatened(this.check.opponentColor);
@@ -179,6 +189,7 @@ export default class Board {
         
         return newValidMoves;
     }
+    // Add file, rank, or file and rank to the algebraic notation when ambiguous
     _disambiguateNotation(move) {
         const existingMove = this.validMoves[move.notation];
         if (!existingMove) return this.validMoves[move.notation] = move;

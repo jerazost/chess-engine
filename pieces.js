@@ -262,6 +262,8 @@ class Pawn extends Piece {
         this.checkAttack()
     }
 }
+
+// Encapsulates all the derived class constructors
 export default class Pieces {
     constructor() {
         this.dict = {

@@ -4,7 +4,7 @@ import GUI from "./gui.js";
 // TODO: Check
 // 1. Flag a direct check [x]
 // 2. Flag a revealed check
-// 3. Filter moves that don't escape check []
+// 3. Filter moves that don't escape check [?] (Need to simulate second board state)
 
 // TODO: Checkmate
 // TODO: En Passant
